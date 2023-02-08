@@ -1,13 +1,17 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.8;
 
-contract DelegatedDelegator {
+import './interfaces/IDelegatedDelegator.sol';
+
+import './FlareLibrary.sol';
+
+contract DelegatedDelegator is IDelegatedDelegator {
 
     address public owner;
     address private pendingOwner;
     mapping(address => bool) public executors;
 
-    IWNat public immutable wNat = FlareLibrary.getWNat();
+    IWNat public wNat = FlareLibrary.getWNat();
 
     modifier onlyOwner {
         require(msg.sender == owner, 'Forbidden');
@@ -19,9 +23,9 @@ contract DelegatedDelegator {
         _;
     }
 
-    constructor() {
-        owner = msg.sender;
-        wNat.governanceVotePower().delegate(owner);
+    constructor(address _owner) {
+        owner = _owner;
+        wNat.governanceVotePower().delegate(_owner);
     }
 
     receive() external payable {}
@@ -38,24 +42,50 @@ contract DelegatedDelegator {
     }
 
     function addExecutor(address executor) external onlyOwner {
-        executors[executor] = true;
+        if (!executors[executor]) {
+            executors[executor] = true;
+            emit ExecutorAdded(executor);
+        }
     }
 
     function removeExecutor(address executor) external onlyOwner {
-        executors[executor] = false;
+        if (executors[executor]) {
+            executors[executor] = false;
+            emit ExecutorRemoved(executor);
+        }
     }
     function delegate(address[] calldata providers, uint256[] calldata bips) external onlyOwnerOrExecutors {
         require(providers.length == bips.length, 'Length mismatch');
         wNat.undelegateAll();
+        uint256 total;
         for (uint256 i; i < providers.length; i++) {
             wNat.delegate(providers[i], bips[i]);
+            total += bips[i];
         }
+        require(total == 100_00, 'Not delegating 100%');
     }
 
-    function claim(IFtsoRewardManager rewardManager, uint256[] calldata epochs) public onlyOwnerOrExecutors {
+    function claim(IFtsoRewardManager rewardManager, uint256[] calldata epochs) external onlyOwnerOrExecutors {
         rewardManager.claimReward(payable(address(this)), epochs);
         if (address(this).balance > 0) {
             wNat.deposit{value: address(this).balance }();
+        }
+    }
+
+    function claimDistribution(IDistributionToDelegators distributionToDelegators, uint256 month) external onlyOwnerOrExecutors {
+        distributionToDelegators.claim(address(this), address(this), month, false);
+        if (address(this).balance > 0) {
+            wNat.deposit{value: address(this).balance }();
+        }
+    }
+
+    function replaceWNat() external onlyOwnerOrExecutors {
+        IWNat newWNat = FlareLibrary.getWNat();
+        if (address(newWNat) != address(wNat)) {
+            wNat.withdraw(wNat.balanceOf(address(this)));
+            newWNat.deposit{value: address(this).balance}();
+            wNat = newWNat;
+            wNat.governanceVotePower().delegate(owner);
         }
     }
 
@@ -88,7 +118,7 @@ contract DelegatedDelegator {
     function genericTransaction(address target, bytes calldata data) external payable onlyOwner {
         (bool success, bytes memory result) = target.call{value: msg.value}(data);
         if (!success) {
-            if (result.length == 0) revert('revert with no reason');
+            if (result.length == 0) revert('Revert with no reason');
             assembly {
                 let result_len := mload(result)
                 revert(add(32, result), result_len)
@@ -97,62 +127,3 @@ contract DelegatedDelegator {
     }
 
 }
-
-library FlareLibrary {
-    IPriceSubmitter private constant priceSubmitter = IPriceSubmitter(0x1000000000000000000000000000000000000003);
-
-    function getFtsoManager() internal view returns (IFtsoManager) {
-        return IFtsoManager(priceSubmitter.getFtsoManager());
-    }
-
-    function getFtsoRewardManager() internal view returns (IFtsoRewardManager) {
-        return IFtsoRewardManager(getFtsoManager().rewardManager());
-    }
-
-    function getWNat() internal view returns (IWNat) {
-        return IWNat(getFtsoRewardManager().wNat());
-    }
-}
-
-interface IPriceSubmitter {
-    function getFtsoManager() external view returns (address);
-}
-
-interface IFtsoManager {
-    function rewardManager() external view returns (address);
-}
-
-interface IFtsoRewardManager {
-    function wNat() external view returns (address);
-
-    function claimReward(
-        address payable _recipient,
-        uint256[] calldata _rewardEpochs
-    ) external returns (uint256 _rewardAmount);
-}
-
-interface IERC20 {
-    function balanceOf(address owner) external view returns (uint256);
-
-    function transfer(address to, uint256 value) external returns (bool);
-}
-
-interface IGovernanceVotePower {
-    function delegate(address _to) external;
-}
-
-
-interface IVPToken {
-    function delegate(address _to, uint256 _bips) external;
-
-    function undelegateAll() external;
-
-    function governanceVotePower() external view returns (IGovernanceVotePower);
-}
-
-interface IWNat is IERC20, IVPToken {
-    function deposit() external payable;
-
-    function withdraw(uint256) external;
-}
-
