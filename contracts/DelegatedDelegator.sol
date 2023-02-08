@@ -54,6 +54,11 @@ contract DelegatedDelegator is IDelegatedDelegator {
             emit ExecutorRemoved(executor);
         }
     }
+
+    function delegates() external view returns (address[] memory delegateAddresses, uint256[] memory bips, uint256 count) {
+        (delegateAddresses, bips, count, ) = wNat.delegatesOf(address(this));
+    }
+
     function delegate(address[] calldata providers, uint256[] calldata bips) external onlyOwnerOrExecutors {
         require(providers.length == bips.length, 'Length mismatch');
         wNat.undelegateAll();
@@ -62,7 +67,8 @@ contract DelegatedDelegator is IDelegatedDelegator {
             wNat.delegate(providers[i], bips[i]);
             total += bips[i];
         }
-        require(total == 100_00, 'Not delegating 100%');
+        (, , uint256 count, ) = wNat.delegatesOf(address(this));
+        require(total == 100_00 && count == providers.length, 'Not delegating 100%');
     }
 
     function claim(IFtsoRewardManager rewardManager, uint256[] calldata epochs) external onlyOwnerOrExecutors {

@@ -19,6 +19,7 @@ interface IDelegatedDelegator {
     function addExecutor(address executor) external;
     function removeExecutor(address executor) external;
 
+    function delegates() external view returns (address[] memory delegateAddresses, uint256[] memory bips, uint256 count);
     function delegate(address[] calldata providers, uint256[] calldata bips) external;
 
     function claim(IFtsoRewardManager rewardManager, uint256[] calldata epochs) external;
