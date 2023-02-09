@@ -9,7 +9,10 @@ contract DelegatedDelegator is IDelegatedDelegator {
 
     address public owner;
     address private pendingOwner;
-    mapping(address => bool) public executors;
+    mapping(address => uint256) private executorsMap;
+    address[] private executorsArray;
+    mapping(address => uint256) private delegatorsMap;
+    address[] private delegatorsArray;
 
     IWNat public wNat = FlareLibrary.getWNat();
 
@@ -19,7 +22,12 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     modifier onlyOwnerOrExecutors {
-        require(msg.sender == owner || executors[msg.sender], 'Forbidden');
+        require(msg.sender == owner || executorsMap[msg.sender] > 0, 'Forbidden');
+        _;
+    }
+
+    modifier onlyOwnerOrDelegators {
+        require(msg.sender == owner || delegatorsMap[msg.sender] > 0, 'Forbidden');
         _;
     }
 
@@ -41,17 +49,65 @@ contract DelegatedDelegator is IDelegatedDelegator {
         pendingOwner = address(0);
     }
 
+    function isExecutor(address executor) external view returns (bool) {
+        return executorsMap[executor] > 0;
+    }
+
+    function executors() external view returns (address[] memory) {
+        return executorsArray;
+    }
+
     function addExecutor(address executor) external onlyOwner {
-        if (!executors[executor]) {
-            executors[executor] = true;
+        if (executorsMap[msg.sender] == 0) {
+            executorsArray.push(executor);
+            executorsMap[executor] = executorsArray.length;
             emit ExecutorAdded(executor);
         }
     }
 
     function removeExecutor(address executor) external onlyOwner {
-        if (executors[executor]) {
-            executors[executor] = false;
+        uint256 i = executorsMap[msg.sender];
+        if (i > 0) {
+            if (i < executorsArray.length) {
+                address lastExecutor = executorsArray[executorsArray.length - 1];
+                executorsArray[i - 1] = lastExecutor;
+                executorsMap[lastExecutor] = i;
+
+            }
+            executorsArray.pop();
+            executorsMap[executor] = 0;
             emit ExecutorRemoved(executor);
+        }
+    }
+
+    function isDelegator(address delegator) external view returns (bool) {
+        return delegatorsMap[delegator] > 0;
+    }
+
+    function delegators() external view returns (address[] memory) {
+        return delegatorsArray;
+    }
+
+    function addDelegator(address delegator) external onlyOwner {
+        if (delegatorsMap[msg.sender] == 0) {
+            delegatorsArray.push(delegator);
+            delegatorsMap[delegator] = delegatorsArray.length;
+            emit DelegatorAdded(delegator);
+        }
+    }
+
+    function removeDelegator(address delegator) external onlyOwner {
+        uint256 i = delegatorsMap[msg.sender];
+        if (i > 0) {
+            if (i < delegatorsArray.length) {
+                address lastDelegator = delegatorsArray[delegatorsArray.length - 1];
+                delegatorsArray[i - 1] = lastDelegator;
+                delegatorsMap[lastDelegator] = i;
+
+            }
+            delegatorsArray.pop();
+            delegatorsMap[delegator] = 0;
+            emit DelegatorRemoved(delegator);
         }
     }
 
@@ -59,7 +115,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
         (delegateAddresses, bips, count, ) = wNat.delegatesOf(address(this));
     }
 
-    function delegate(address[] calldata providers, uint256[] calldata bips) external onlyOwnerOrExecutors {
+    function delegate(address[] calldata providers, uint256[] calldata bips) external onlyOwnerOrDelegators {
         require(providers.length == bips.length, 'Length mismatch');
         wNat.undelegateAll();
         uint256 total;
