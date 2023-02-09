@@ -1,6 +1,6 @@
 # Delegated Delegator
 
-A set of smart contracts to help automating the FTSO delegation and reward claiming, without using the private key of the ultimate owner of the tokens. The primary use case is to allow to claim FTSO rewards and next Flare distributions associated to a cold wallet. The owner can define different and multiple delegator and executor addresses that can delegate and/or claim rewards on behalf of the owner, but only the owner can withdraw the funds and the rewards from the contract. Governance voting power is transferred back to the owner.
+A set of smart contracts to help automating the FTSO delegation and reward claiming, without using the private key of the ultimate owner of the tokens. The primary use case is to allow to claim FTSO rewards and next Flare distributions associated to a cold wallet. Another use case is to allow delegating to more than 2 FTSO providers without having to manage multiple accounts. The owner can define different and multiple delegator and executor addresses that can delegate and/or claim rewards on behalf of the owner, but only the owner can withdraw the funds and the rewards from the contract. Governance voting power is transferred back to the owner.
 
 A wallet can instantiate a new `DelegatedDelegator` smart contract, by calling the `create` function of the `DelegatedDelegatorFactory` contract, and by parsing the generated `Created` event to get the new instance address.
 
@@ -16,6 +16,8 @@ Any address can then send wrapped tokens to the generated address, or use its `d
 The executor can periodically claim the FTSO rewards and the Flare distribution, by calling the `claim` and `claimDistribution` functions.
 
 Finally, only when needed, the owner can get back its funds by calling the `withdraw` or `withdrawAll` functions.
+
+A single owner can create multiple `DelegatedDelegator` instances to split its holdings and delegate to more than 2 providers.
 
 ## Deployments
 
