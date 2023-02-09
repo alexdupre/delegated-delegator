@@ -7,29 +7,31 @@ import "./DelegatedDelegator.sol";
 contract DelegatedDelegatorFactory is IDelegatedDelegatorFactory {
 
     mapping(address => NamedInstance[]) private instances;
+    mapping(address => address) public creatorOf;
 
     function create(string calldata description) external returns (address instance) {
-        address owner = msg.sender;
-        instance = address(new DelegatedDelegator(owner));
+        address creator = msg.sender;
+        instance = address(new DelegatedDelegator(creator));
         if (bytes(description).length > 0) {
-            NamedInstance storage ni = instances[owner].push();
+            NamedInstance storage ni = instances[creator].push();
             ni.instance = instance;
             ni.description = description;
         }
-        emit Created(instance, owner);
+        creatorOf[instance] = creator;
+        emit Created(instance, creator);
     }
 
-    function count(address owner) external view returns (uint256) {
-        return instances[owner].length;
+    function count(address creator) external view returns (uint256) {
+        return instances[creator].length;
     }
 
-    function get(address owner, uint256 i) external view returns (address instance, string memory description) {
-        NamedInstance storage ni = instances[owner][i];
+    function get(address creator, uint256 i) external view returns (address instance, string memory description) {
+        NamedInstance storage ni = instances[creator][i];
         return (ni.instance, ni.description);
     }
 
-    function getAll(address owner) external view returns (NamedInstance[] memory) {
-        return instances[owner];
+    function getAll(address creator) external view returns (NamedInstance[] memory) {
+        return instances[creator];
     }
 
     function rename(address instance, string calldata description) external {
