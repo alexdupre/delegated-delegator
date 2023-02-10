@@ -58,7 +58,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function addExecutor(address executor) external onlyOwner {
-        if (executorsMap[msg.sender] == 0) {
+        if (executorsMap[executor] == 0) {
             executorsArray.push(executor);
             executorsMap[executor] = executorsArray.length;
             emit ExecutorAdded(executor);
@@ -66,7 +66,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function removeExecutor(address executor) external onlyOwner {
-        uint256 i = executorsMap[msg.sender];
+        uint256 i = executorsMap[executor];
         if (i > 0) {
             if (i < executorsArray.length) {
                 address lastExecutor = executorsArray[executorsArray.length - 1];
@@ -89,7 +89,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function addDelegator(address delegator) external onlyOwner {
-        if (delegatorsMap[msg.sender] == 0) {
+        if (delegatorsMap[delegator] == 0) {
             delegatorsArray.push(delegator);
             delegatorsMap[delegator] = delegatorsArray.length;
             emit DelegatorAdded(delegator);
@@ -97,7 +97,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function removeDelegator(address delegator) external onlyOwner {
-        uint256 i = delegatorsMap[msg.sender];
+        uint256 i = delegatorsMap[delegator];
         if (i > 0) {
             if (i < delegatorsArray.length) {
                 address lastDelegator = delegatorsArray[delegatorsArray.length - 1];
