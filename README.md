@@ -24,4 +24,7 @@ A single owner can create multiple `DelegatedDelegator` instances to split its h
 `DelegatedDelegatorFactory`
 | Chain    | Address                                      |
 |----------| -------------------------------------------- |
-| Coston   | [0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca](https://coston-explorer.flare.network/address/0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca) |
+| Coston   | [0xE4200d40783B7e08a25a71C767792A8b564A54C9](https://coston-explorer.flare.network/address/0xE4200d40783B7e08a25a71C767792A8b564A54C9) |
+| Coston2  | [0xc2826E4Ed912fB1EAC94c2Ce97e4111780Cd85be](https://coston2-explorer.flare.network/address/0xc2826E4Ed912fB1EAC94c2Ce97e4111780Cd85be) |
+| Songbird | [0x026f603FD318d60E6C68351d6172244f3C4F6dC6](https://songbird-explorer.flare.network/address/0x026f603FD318d60E6C68351d6172244f3C4F6dC6) |
+| Flare    | [0xc98fbA33De5DC14f691aa4Ad3dEA047c0C1a3886](https://flare-explorer.flare.network/address/0xc98fbA33De5DC14f691aa4Ad3dEA047c0C1a3886) |
