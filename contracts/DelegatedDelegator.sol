@@ -39,6 +39,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     receive() external payable {}
 
     function changeOwner(address newOwner) external onlyOwner {
+        require(newOwner != address(0), 'Address zero');
         pendingOwner = newOwner;
     }
 
@@ -58,6 +59,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function addExecutor(address executor) external onlyOwner {
+        require(executor != address(0), 'Address zero');
         if (executorsMap[executor] == 0) {
             executorsArray.push(executor);
             executorsMap[executor] = executorsArray.length;
@@ -89,6 +91,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     function addDelegator(address delegator) external onlyOwner {
+        require(delegator != address(0), 'Address zero');
         if (delegatorsMap[delegator] == 0) {
             delegatorsArray.push(delegator);
             delegatorsMap[delegator] = delegatorsArray.length;

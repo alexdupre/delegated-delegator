@@ -24,4 +24,4 @@ A single owner can create multiple `DelegatedDelegator` instances to split its h
 `DelegatedDelegatorFactory`
 | Chain    | Address                                      |
 |----------| -------------------------------------------- |
-| Coston   | [0x026f603FD318d60E6C68351d6172244f3C4F6dC6](https://coston-explorer.flare.network/address/0x026f603FD318d60E6C68351d6172244f3C4F6dC6) |
+| Coston   | [0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca](https://coston-explorer.flare.network/address/0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca) |
