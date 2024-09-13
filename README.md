@@ -13,7 +13,7 @@ Either the owner or a delegator should then set the first list of FTSO providers
 
 Any address can then send wrapped tokens to the generated address, or use its `deposit` function with native tokens, to increase the contract wrapped balance, and consequentially its voting power.
 
-The executor can periodically claim the FTSO rewards and the Flare distribution, by calling the `claim` and `claimDistribution` functions.
+The executor can periodically claim the FTSO rewards and the Flare distribution, by calling the `claimV1`, `claimV2` and `claimDistribution` functions.
 
 Finally, only when needed, the owner can get back its funds by calling the `withdraw` or `withdrawAll` functions.
 
@@ -24,7 +24,7 @@ A single owner can create multiple `DelegatedDelegator` instances to split its h
 `DelegatedDelegatorFactory`
 | Chain    | Address                                      |
 |----------| -------------------------------------------- |
-| Coston   | [0xE4200d40783B7e08a25a71C767792A8b564A54C9](https://coston-explorer.flare.network/address/0xE4200d40783B7e08a25a71C767792A8b564A54C9) |
-| Coston2  | [0xc2826E4Ed912fB1EAC94c2Ce97e4111780Cd85be](https://coston2-explorer.flare.network/address/0xc2826E4Ed912fB1EAC94c2Ce97e4111780Cd85be) |
-| Songbird | [0x026f603FD318d60E6C68351d6172244f3C4F6dC6](https://songbird-explorer.flare.network/address/0x026f603FD318d60E6C68351d6172244f3C4F6dC6) |
-| Flare    | [0xc98fbA33De5DC14f691aa4Ad3dEA047c0C1a3886](https://flare-explorer.flare.network/address/0xc98fbA33De5DC14f691aa4Ad3dEA047c0C1a3886) |
+| Coston   | [0x38c6B4474Cc15fC080FaafCF37d32e822355bF26](https://coston-explorer.flare.network/address/0x38c6B4474Cc15fC080FaafCF37d32e822355bF26) |
+| Coston2  | [0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca](https://coston2-explorer.flare.network/address/0xe2Fb678bC1Bd259a2F5d7792F7dDD6Ecb53fa9ca) |
+| Songbird | [0xE4200d40783B7e08a25a71C767792A8b564A54C9](https://songbird-explorer.flare.network/address/0xE4200d40783B7e08a25a71C767792A8b564A54C9) |
+| Flare    | [0x026f603FD318d60E6C68351d6172244f3C4F6dC6](https://flare-explorer.flare.network/address/0x026f603FD318d60E6C68351d6172244f3C4F6dC6) |

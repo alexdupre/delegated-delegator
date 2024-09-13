@@ -1,5 +1,5 @@
-require('@nomiclabs/hardhat-ethers')
-require("@nomiclabs/hardhat-etherscan");
+require('@nomicfoundation/hardhat-ignition-ethers')
+require("@nomicfoundation/hardhat-verify");
 
 require('dotenv/config')
 
@@ -93,7 +93,7 @@ module.exports = {
     ]
   },
   solidity: {
-    version: '0.8.18',
+    version: '0.8.27',
     settings: {
       metadata: {
         bytecodeHash: 'none',
@@ -103,6 +103,10 @@ module.exports = {
         enabled: true,
         runs: 10000,
       },
+      viaIR: true,
     },
+  },
+  sourcify: {
+    enabled: false
   },
 }

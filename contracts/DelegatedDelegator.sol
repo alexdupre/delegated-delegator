@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.8;
+pragma solidity ^0.8.27;
 
 import './interfaces/IDelegatedDelegator.sol';
 
@@ -14,7 +14,7 @@ contract DelegatedDelegator is IDelegatedDelegator {
     mapping(address => uint256) private delegatorsMap;
     address[] private delegatorsArray;
 
-    IWNat public wNat = FlareLibrary.getWNat();
+    IWNat private wNat = FlareLibrary.getWNat();
 
     modifier onlyOwner {
         require(msg.sender == owner, 'Forbidden');
@@ -37,6 +37,10 @@ contract DelegatedDelegator is IDelegatedDelegator {
     }
 
     receive() external payable {}
+
+    function wNatAddress() external view returns (address) {
+        return address(wNat);
+    }
 
     function changeOwner(address newOwner) external onlyOwner {
         require(newOwner != address(0), 'Address zero');
@@ -130,15 +134,29 @@ contract DelegatedDelegator is IDelegatedDelegator {
         require(total == 100_00 && count == providers.length, 'Not delegating 100%');
     }
 
-    function claim(IFtsoRewardManager rewardManager, uint256[] calldata epochs) external onlyOwnerOrExecutors {
-        rewardManager.claimReward(payable(address(this)), epochs);
+    function claim(address rewardManager, uint256[] calldata epochs) external onlyOwnerOrExecutors {
+        IFtsoRewardManager(rewardManager).claimReward(payable(address(this)), epochs);
         if (address(this).balance > 0) {
             wNat.deposit{value: address(this).balance }();
         }
     }
 
-    function claimDistribution(IDistributionToDelegators distributionToDelegators, uint256 month) external onlyOwnerOrExecutors {
-        distributionToDelegators.claim(address(this), address(this), month, false);
+    function claimV1(address rewardManager, uint256 epoch) external onlyOwnerOrExecutors {
+        IFtsoRewardManager(rewardManager).claim(address(this), payable(address(this)), epoch, false);
+        if (address(this).balance > 0) {
+            wNat.deposit{value: address(this).balance }();
+        }
+    }
+
+    function claimV2(address rewardManager, uint24 epoch) external onlyOwnerOrExecutors {
+        RewardsV2Interface(rewardManager).claim(address(this), payable(address(this)), epoch, false, new RewardsV2Interface.RewardClaimWithProof[](0));
+        if (address(this).balance > 0) {
+            wNat.deposit{value: address(this).balance }();
+        }
+    }
+
+    function claimDistribution(address distributionToDelegators, uint256 month) external onlyOwnerOrExecutors {
+        IDistributionToDelegators(distributionToDelegators).claim(address(this), address(this), month, false);
         if (address(this).balance > 0) {
             wNat.deposit{value: address(this).balance }();
         }
@@ -176,8 +194,8 @@ contract DelegatedDelegator is IDelegatedDelegator {
         withdraw(wNat.balanceOf(address(this)), unwrap);
     }
 
-    function withdrawAllToken(IERC20 token) external onlyOwner {
-        token.transfer(owner, token.balanceOf(address(this)));
+    function withdrawAllToken(address token) external onlyOwner {
+        IERC20(token).transfer(owner, IERC20(token).balanceOf(address(this)));
     }
 
     function genericTransaction(address target, bytes calldata data) external payable onlyOwner {

@@ -2,21 +2,42 @@
 pragma solidity >=0.7.5;
 pragma abicoder v2;
 
-interface IPriceSubmitter {
-    function getFtsoManager() external view returns (address);
-}
-
-interface IFtsoManager {
-    function rewardManager() external view returns (address);
-}
-
 interface IFtsoRewardManager {
-    function wNat() external view returns (address);
-
     function claimReward(
         address payable _recipient,
         uint256[] calldata _rewardEpochs
     ) external returns (uint256 _rewardAmount);
+
+    function claim(
+        address _rewardOwner,
+        address payable _recipient,
+        uint256 _rewardEpoch,
+        bool _wrap
+    ) external returns (uint256 _rewardAmount);
+}
+
+interface RewardsV2Interface {
+    enum ClaimType { DIRECT, FEE, WNAT, MIRROR, CCHAIN }
+
+    struct RewardClaimWithProof {
+        bytes32[] merkleProof;
+        RewardClaim body;
+    }
+
+    struct RewardClaim {
+        uint24 rewardEpochId;
+        bytes20 beneficiary;
+        uint120 amount;
+        ClaimType claimType;
+    }
+
+    function claim(
+        address _rewardOwner,
+        address payable _recipient,
+        uint24 _rewardEpochId,
+        bool _wrap,
+        RewardClaimWithProof[] calldata _proofs
+    ) external returns (uint256 _rewardAmountWei);
 }
 
 interface IDistributionToDelegators {
@@ -33,7 +54,6 @@ interface IGovernanceVotePower {
     function delegate(address _to) external;
 }
 
-
 interface IVPToken {
     function delegatesOf(address _owner) external view returns (address[] memory _delegateAddresses, uint256[] memory _bips, uint256 _count, uint256 _delegationMode);
 
@@ -48,4 +68,8 @@ interface IWNat is IERC20, IVPToken {
     function deposit() external payable;
 
     function withdraw(uint256) external;
+}
+
+interface IFlareContractRegistry {
+    function getContractAddressByHash(bytes32 _nameHash) external view returns (address);
 }
